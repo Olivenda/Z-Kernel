@@ -6,6 +6,16 @@ LD      := $(CROSS)ld
 OBJCOPY := $(CROSS)objcopy
 AS      := $(CC)
 
+# Fall back to the host toolchain when a cross-compiler is unavailable so
+# developers without x86_64-elf-* packages can still build and boot the ELF.
+ifeq (,$(shell command -v $(CC) 2>/dev/null))
+$(info Cross compiler $(CC) not found, using host compiler instead)
+CC      := gcc
+LD      := ld
+OBJCOPY := objcopy
+AS      := $(CC)
+endif
+
 BUILD_DIR := build
 SRC_DIR := src
 ISO_DIR := iso
@@ -19,6 +29,9 @@ KCONFIG_MK ?= config.mk
 
 KCONFIG ?= scripts/kconfig/conf
 MCONF ?= scripts/kconfig/mconf
+
+QEMU ?= qemu-system-x86_64
+QEMU_FLAGS ?= -m 512M -serial stdio
 
 KERNEL_ELF := $(BUILD_DIR)/kernel.elf
 KERNEL_BIN := $(BUILD_DIR)/kernel.bin
@@ -111,22 +124,35 @@ iso: $(ALL_BINS) dirs_iso
 	@mkdir -p $(GRUB_DIR)
 	cp $(KERNEL_ELF) $(BOOT_DIR)/kernel.elf
 	printf '%s\n' \
-		"menuentry \"Z-Kernel\" {" \
-		"  multiboot2 /boot/kernel.elf" \
-		"  boot" \
-		"}" > $(GRUB_DIR)/grub.cfg
+	        "menuentry \"Z-Kernel\" {" \
+	        "  multiboot2 /boot/kernel.elf" \
+	        "  boot" \
+	        "}" > $(GRUB_DIR)/grub.cfg
 	@if [ "$(CONFIG_USE_GRUB)" = "y" ]; then \
-		if command -v grub-mkrescue >/dev/null 2>&1; then \
-			grub-mkrescue -o zkernel.iso $(ISO_DIR) >/dev/null; \
-		echo "Created zkernel.iso"; \
-		else \
-		echo "Error: grub-mkrescue not found. Install grub2-common/grub-efi or set CONFIG_USE_GRUB to n"; exit 1; \
-		fi; \
-		else \
-		echo "Skipping iso creation (CONFIG_USE_GRUB != y)"; \
+	        if command -v grub-mkrescue >/dev/null 2>&1; then \
+	                grub-mkrescue -o zkernel.iso $(ISO_DIR) >/dev/null; \
+	        echo "Created zkernel.iso"; \
+	        else \
+	        echo "Warning: grub-mkrescue not found. Skipping ISO creation; install grub2-common/grub-efi or set CONFIG_USE_GRUB to n"; \
+	        rm -f zkernel.iso; \
+	        fi; \
+	        else \
+	        echo "Skipping iso creation (CONFIG_USE_GRUB != y)"; \
 	fi
 run: all
-	qemu-system-x86_64 -cdrom zkernel.iso -m 512M -serial stdio
+	@if [ -f zkernel.iso ]; then \
+	        echo "Booting via GRUB ISO..."; \
+	        $(QEMU) -cdrom zkernel.iso $(QEMU_FLAGS); \
+	else \
+	        echo "Booting kernel ELF directly..."; \
+	        $(QEMU) -kernel $(KERNEL_ELF) $(QEMU_FLAGS); \
+	fi
+
+run-elf: $(KERNEL_ELF)
+	$(QEMU) -kernel $(KERNEL_ELF) $(QEMU_FLAGS)
+
+run-iso: iso
+	$(QEMU) -cdrom zkernel.iso $(QEMU_FLAGS)
 
 defconfig: $(KCONFIG)
 	$(KCONFIG) --defconfig Kconfig

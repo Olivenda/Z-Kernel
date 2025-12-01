@@ -5,13 +5,42 @@
 #include <stdlib.h>
 #include <string.h>
 
+static bool colors_ready = false;
+
 static const char *env_or_default(const char *name, const char *def) {
     const char *v = getenv(name);
     return v ? v : def;
 }
 
+static void init_colors(void) {
+    if (!has_colors())
+        return;
+
+    start_color();
+    use_default_colors();
+    init_pair(1, COLOR_CYAN, -1);   /* section headers */
+    init_pair(2, COLOR_GREEN, -1);  /* enabled toggles */
+    init_pair(3, COLOR_RED, -1);    /* disabled toggles */
+    init_pair(4, COLOR_YELLOW, -1); /* footer/help */
+    colors_ready = true;
+}
+
+static void push_color(short pair) {
+    if (colors_ready)
+        attron(COLOR_PAIR(pair));
+}
+
+static void pop_color(short pair) {
+    if (colors_ready)
+        attroff(COLOR_PAIR(pair));
+}
+
 static void draw_help(int rows) {
+    push_color(4);
+    attron(A_BOLD);
     mvprintw(rows-3, 0, "Space: toggle/select  Enter: edit string  S: save  Q: quit");
+    attroff(A_BOLD);
+    pop_color(4);
 }
 
 static void render_menu(kconfig_t *kc, int highlight, int rows) {
@@ -28,18 +57,27 @@ static void render_menu(kconfig_t *kc, int highlight, int rows) {
                 }
             }
             if (idx == highlight) attron(A_REVERSE);
+            push_color(1);
+            attron(A_BOLD);
             mvprintw(idx, 0, "(choice) %s: %s", opt->prompt ? opt->prompt : "Choice", active ? active->prompt : "<none>");
+            attroff(A_BOLD);
+            pop_color(1);
             if (idx == highlight) attroff(A_REVERSE);
             idx++;
         } else {
             const char *prefix = "[ ]";
             char value_buf[64] = {0};
+            short pair = 0;
             if (opt->type == OPT_BOOL)
                 prefix = opt->bool_val ? "[*]" : "[ ]";
+            if (opt->type == OPT_BOOL || opt->type == OPT_CHOICE_OPT)
+                pair = opt->bool_val ? 2 : 3;
             if (opt->type == OPT_STRING)
                 snprintf(value_buf, sizeof(value_buf), " = %s", opt->str_val ? opt->str_val : "");
             if (idx == highlight) attron(A_REVERSE);
+            if (pair) push_color(pair);
             mvprintw(idx, 0, "%s %s%s", prefix, opt->prompt ? opt->prompt : opt->name, value_buf);
+            if (pair) pop_color(pair);
             if (idx == highlight) attroff(A_REVERSE);
             idx++;
         }
@@ -105,6 +143,7 @@ int main(int argc, char **argv) {
     keypad(stdscr, TRUE);
     noecho();
     curs_set(0);
+    init_colors();
 
     int highlight = 0;
     int running = 1;
