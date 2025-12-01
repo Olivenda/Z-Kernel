@@ -28,6 +28,7 @@ Build and run:
 Files of interest:
 - src/boot.S   : multiboot2 header + minimal long-mode switch (assembly)
 - src/kernel.c : minimal C kernel that writes to VGA memory
+- src/drivers/ : placeholder for future drivers to keep hardware logic organized
 - link.ld      : linker script
 - Makefile     : build system and ISO creation
 - scripts/kconfig/* : tiny Kconfig parser + `conf`/`mconf` style helpers
