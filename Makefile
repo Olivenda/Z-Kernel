@@ -28,15 +28,43 @@ KERNEL_BIN := $(BUILD_DIR)/kernel.bin
 ENABLE_HELLO ?= 1
 LANGUAGE ?= en
 USE_GRUB ?= 1
+ENABLE_DEBUG ?= 0
+OPT_LEVEL ?= O2
+ENABLE_BIN ?= 1
+CUSTOM_CFLAGS ?=
 
-CFLAGS  := -m64 -O2 -ffreestanding -nostdlib -fno-stack-protector -Wall -Wextra -Iinclude
+# base CFLAGS
+CFLAGS  := -m64 -ffreestanding -nostdlib -fno-stack-protector -Wall -Wextra -Iinclude
+
+# debug and optimization
+ifeq ($(ENABLE_DEBUG),1)
+CFLAGS += -g
+endif
+
+ifeq ($(OPT_LEVEL),O0)
+CFLAGS += -O0
+else
+CFLAGS += -O2
+endif
+
+# append any custom flags provided via menuconfig
+ifneq ($(strip $(CUSTOM_CFLAGS)),)
+CFLAGS += $(CUSTOM_CFLAGS)
+endif
+
 LDFLAGS := -T link.ld
 
 SRC := $(SRC_DIR)/kernel.c $(SRC_DIR)/boot.S
 OBJ := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter %.c,$(SRC))) $(patsubst $(SRC_DIR)/%.S,$(BUILD_DIR)/%.o,$(filter %.S,$(SRC)))
 
 .PHONY: all clean iso run menuconfig config
-all: $(KERNEL_ELF) $(KERNEL_BIN) iso
+
+ALL_BINS := $(KERNEL_ELF)
+ifeq ($(ENABLE_BIN),1)
+ALL_BINS += $(KERNEL_BIN)
+endif
+
+all: $(ALL_BINS) iso
 
 # generate build directories
 $(BUILD_DIR):
@@ -68,20 +96,20 @@ iso: $(KERNEL_ELF)
 	mkdir -p $(GRUB_DIR)
 	cp $(KERNEL_ELF) $(BOOT_DIR)/kernel.elf
 	cat > $(GRUB_DIR)/grub.cfg <<'EOF'
-menuentry "Z-Kernel" {
-  multiboot2 /boot/kernel.elf
-  boot
-}
-EOF
-	@if [ $(USE_GRUB) -eq 1 ]; then \ 
-		if command -v grub-mkrescue >/dev/null 2>&1; then \ 
-			grub-mkrescue -o zkernel.iso $(ISO_DIR) >/dev/null; \ 
-			echo "Created zkernel.iso"; \ 
-		else \ 
-			echo "Error: grub-mkrescue not found. Install grub2-common/grub-efi or use USE_GRUB=0"; exit 1; \ 
-		fi; \ 
-	else \ 
-		echo "Skipping iso creation (USE_GRUB != 1)"; \ 
+	menuentry "Z-Kernel" {
+	  multiboot2 /boot/kernel.elf
+	  boot
+	}
+	EOF
+	@if [ $(USE_GRUB) -eq 1 ]; then \
+		if command -v grub-mkrescue >/dev/null 2>&1; then \
+			grub-mkrescue -o zkernel.iso $(ISO_DIR) >/dev/null; \
+			echo "Created zkernel.iso"; \
+		else \
+			echo "Error: grub-mkrescue not found. Install grub2-common/grub-efi or use USE_GRUB=0"; exit 1; \
+		fi; \
+	else \
+		echo "Skipping iso creation (USE_GRUB != 1)"; \
 	fi
 
 # run in qemu
@@ -96,6 +124,10 @@ config: # show effective config
 	@echo "ENABLE_HELLO=$(ENABLE_HELLO)"
 	@echo "LANGUAGE=$(LANGUAGE)"
 	@echo "USE_GRUB=$(USE_GRUB)"
+	@echo "ENABLE_DEBUG=$(ENABLE_DEBUG)"
+	@echo "OPT_LEVEL=$(OPT_LEVEL)"
+	@echo "ENABLE_BIN=$(ENABLE_BIN)"
+	@echo "CUSTOM_CFLAGS=$(CUSTOM_CFLAGS)"
 
 clean:
 	rm -rf $(BUILD_DIR) $(ISO_DIR) zkernel.iso config.mk
