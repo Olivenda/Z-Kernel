@@ -1,7 +1,9 @@
 Z-Kernel: Minimal 64-bit kernel
 
 This project demonstrates a minimal 64-bit kernel (not Linux) that prints a "Hello World" style
-message to VGA text memory and provides a Makefile with a menuconfig-like interface.
+message to VGA text memory. A small Kconfig-inspired frontend (with ncurses `mconf`) powers
+`make defconfig` and `make menuconfig` targets so you can tweak the build without touching the
+Makefile manually.
 
 Quick start (prerequisites):
 - A cross-compiler toolchain (recommended): x86_64-elf-gcc, x86_64-elf-ld, objcopy
@@ -9,11 +11,12 @@ Quick start (prerequisites):
   Alternatively build/install a cross-compiler (recommended for real kernel dev).
 - grub-mkrescue to create the ISO
 - qemu-system-x86_64 to run
+- ncurses development headers (for building the bundled `mconf` helper)
 
 Build and run:
-1) Optional: Configure with make menuconfig
-   $ make menuconfig
-   This creates config.mk; options: ENABLE_HELLO, LANGUAGE (en/de), USE_GRUB
+1) Configure
+   $ make defconfig     # write defaults to .config + generated headers
+   $ make menuconfig    # interactively change settings from Kconfig (curses UI)
 
 2) Build and create ISO:
    $ make
@@ -26,4 +29,4 @@ Files of interest:
 - src/kernel.c : minimal C kernel that writes to VGA memory
 - link.ld      : linker script
 - Makefile     : build system and ISO creation
-- scripts/menuconfig : small shell prompt to write config.mk
+- scripts/kconfig/* : tiny Kconfig parser + `conf`/`mconf` style helpers

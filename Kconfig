@@ -1,0 +1,51 @@
+# Top-level Kconfig for Z-Kernel
+
+mainmenu "Z-Kernel Configuration"
+
+config HELLO
+    bool "Enable Hello World output"
+    default y
+    help
+      Print a small hello message from the kernel entry point.
+
+choice
+    prompt "Hello language"
+    default LANG_EN
+
+config LANG_EN
+    bool "English"
+
+config LANG_DE
+    bool "Deutsch"
+
+endchoice
+
+config USE_GRUB
+    bool "Create GRUB bootable ISO"
+    default y
+    help
+      When enabled, the build produces a GRUB-mkrescue ISO image.
+
+config ENABLE_BIN
+    bool "Emit raw kernel binary"
+    default y
+    help
+      Build a flat binary alongside the ELF image (useful for experimentation).
+
+config ENABLE_DEBUG
+    bool "Enable debug symbols"
+    default n
+    help
+      Appends -g to the compiler flags for easier debugging.
+
+config OPT_LEVEL
+    string "Optimization level"
+    default "O2"
+    help
+      Controls the compiler optimization level flag passed to GCC.
+
+config CUSTOM_CFLAGS
+    string "Custom CFLAGS"
+    default ""
+    help
+      Additional compiler flags appended to the base kernel CFLAGS.

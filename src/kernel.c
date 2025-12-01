@@ -3,6 +3,7 @@
 */
 
 #include <stdint.h>
+#include <generated/autoconf.h>
 
 void kernel_main(void);
 
@@ -21,13 +22,13 @@ void write_string(const char *s) {
 }
 
 void kernel_main(void) {
-#ifdef LANGUAGE_DE
+#ifdef CONFIG_LANG_DE
     const char *msg = "Hallo Welt";
 #else
     const char *msg = "Hello World";
 #endif
 
-#ifdef ENABLE_HELLO
+#ifdef CONFIG_HELLO
     write_string(msg);
 #endif
     for (;;) {
