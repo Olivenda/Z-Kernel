@@ -103,22 +103,22 @@ dirs_iso:
 
 iso: $(ALL_BINS) dirs_iso
 	@echo Creating ISO directory structure...
+	@mkdir -p $(GRUB_DIR)
 	cp $(KERNEL_ELF) $(BOOT_DIR)/kernel.elf
-	cat > $(GRUB_DIR)/grub.cfg <<'EOFCFG'
-	menuentry "Z-Kernel" {
-	  multiboot2 /boot/kernel.elf
-	  boot
-	}
-	EOFCFG
-	@if [ "$(CONFIG_USE_GRUB)" = "y" ]; then \\
-		if command -v grub-mkrescue >/dev/null 2>&1; then \\
-			grub-mkrescue -o zkernel.iso $(ISO_DIR) >/dev/null; \\
-			echo "Created zkernel.iso"; \\
-		else \\
-			echo "Error: grub-mkrescue not found. Install grub2-common/grub-efi or set CONFIG_USE_GRUB to n"; exit 1; \\
-		fi; \\
-	else \\
-		echo "Skipping iso creation (CONFIG_USE_GRUB != y)"; \\
+	printf '%s\n' \
+		"menuentry \"Z-Kernel\" {" \
+		"  multiboot2 /boot/kernel.elf" \
+		"  boot" \
+		"}" > $(GRUB_DIR)/grub.cfg
+	@if [ "$(CONFIG_USE_GRUB)" = "y" ]; then \
+		if command -v grub-mkrescue >/dev/null 2>&1; then \
+			grub-mkrescue -o zkernel.iso $(ISO_DIR) >/dev/null; \
+		echo "Created zkernel.iso"; \
+		else \
+		echo "Error: grub-mkrescue not found. Install grub2-common/grub-efi or set CONFIG_USE_GRUB to n"; exit 1; \
+		fi; \
+		else \
+		echo "Skipping iso creation (CONFIG_USE_GRUB != y)"; \
 	fi
 run: all
 	qemu-system-x86_64 -cdrom zkernel.iso -m 512M -serial stdio
