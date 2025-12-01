@@ -2,7 +2,7 @@
 
 mainmenu "Linux Kernel Configuration"
 
-menu "General setup"
+menu "General system configuration"
 
 config LOCALVERSION
     string "Local version - append to kernel release"
@@ -40,18 +40,6 @@ config BOOT_BANNER
     help
       Show a short boot banner before other log messages.
 
-config LOG_MEMORY_MAP
-    bool "Log usable memory map"
-    default y
-    help
-      Walk the Stivale2 memory map and log usable ranges at boot.
-
-config HEAP_DEMO
-    bool "Allocate heap demo page"
-    default y
-    help
-      Allocate and report a demo heap page from the bump allocator.
-
 config LOG_ROOTFS
     bool "Log rootfs contents"
     default y
@@ -86,7 +74,7 @@ config BLOCK
       Placeholder toggle for block device support, matching the menuconfig
       layout shown in classic Linux screenshots.
 
-menu "Processor type and features"
+menu "CPU & Architecture options"
 
 config HELLO
     bool "Enable Hello World output"
@@ -114,7 +102,30 @@ config ENABLE_PAGING
 
 endmenu
 
-menu "Power management and ACPI options"
+menu "Memory and RAM options"
+
+config LOG_MEMORY_MAP
+    bool "Log usable memory map"
+    default y
+    help
+      Walk the Stivale2 memory map and log usable ranges at boot.
+
+config HEAP_DEMO
+    bool "Allocate heap demo page"
+    default y
+    help
+      Allocate and report a demo heap page from the bump allocator.
+
+config MEM_TEST_PATTERN
+    bool "Emit memory test pattern"
+    default n
+    help
+      Placeholder toggle to simulate memory diagnostics typically available
+      in menuconfig-driven kernels.
+
+endmenu
+
+menu "Power Management & ACPI"
 
 config PM_STUB
     bool "Stub power management toggle"
@@ -135,7 +146,135 @@ config PCI_STUB
 
 endmenu
 
-menu "Executable file formats / Emulations"
+menu "Filesystem Support"
+
+config FS_STUB
+    bool "Stub filesystem support"
+    default y
+    help
+      Placeholder entry keeping parity with the Linux menuconfig layout.
+
+config RAMFS_SUPPORT
+    bool "Built-in ramfs-style root"
+    default y
+    help
+      Retain the bundled in-memory rootfs as a simple ramfs-like store.
+
+config EXT_STUB
+    bool "EXT-style filesystem helpers"
+    default n
+    help
+      Simulated EXT support toggle mirroring traditional filesystem menus.
+
+endmenu
+
+menu "Networking Support"
+
+config NET_STUB
+    bool "Stub networking stack"
+    default n
+    help
+      Placeholder entry to reproduce the networking menu from the Linux
+      setup UI.
+
+config NET_LOOPBACK
+    bool "Loopback device"
+    default y
+    help
+      Keep a loopback-style placeholder to mirror the kernel's networking
+      defaults.
+
+config NET_IPV4_PLACEHOLDER
+    bool "IPv4 core options"
+    default n
+    help
+      Stub IPv4 selector to flesh out the networking submenu.
+
+endmenu
+
+menu "Network Tools & Diagnostics"
+
+config NET_PING_TRACE
+    tristate "Ping/Traceroute stack"
+    default y
+    help
+      Include a simulated ping/traceroute helper stack to mirror common
+      diagnostic tools.
+
+config NET_PACKET_ANALYZER
+    tristate "Network packet analyzer"
+    default m
+    help
+      Tristate placeholder for a tcpdump-style packet analyzer.
+
+config NET_CONGESTION_SUITE
+    tristate "TCP congestion test suite"
+    default n
+    help
+      Stub congestion control test helpers, displayed as a tristate option.
+
+config NET_WOL_UTILS
+    bool "Wake-on-LAN utilities"
+    default n
+    help
+      Optional Wake-on-LAN helper toggles.
+
+config NET_ROUTING_HELPERS
+    bool "Routing helper tools"
+    default n
+    help
+      Placeholder routing utilities commonly exposed in extended menuconfig
+      frontends.
+
+config NET_SPEEDTEST_CLI
+    tristate "Speedtest CLI module"
+    default m
+    help
+      Simulated speed test client entry shown as a module-capable tristate.
+
+endmenu
+
+menu "Security & Hardening Tools"
+
+config SECURITY_STUB
+    bool "Stub security options"
+    default n
+    help
+      Placeholder entry mirroring the Linux security menu grouping.
+
+config SECURITY_FIREWALL_HELPERS
+    bool "Firewall helpers"
+    default n
+    help
+      Toggle placeholder firewall helper routines.
+
+config SECURITY_IDS_COMPONENTS
+    bool "Intrusion detection components"
+    default n
+    help
+      Stub intrusion-detection building blocks mirrored from the prompt.
+
+config SECURITY_SANDBOX_HELPERS
+    tristate "Sandboxing helpers"
+    default m
+    help
+      Module-capable sandbox helper routines for isolation experiments.
+
+config SECURITY_SECURE_RANDOM
+    bool "Secure random generator tunables"
+    default n
+    help
+      Placeholder secure random generator tuning options.
+
+config SECURITY_PASSWORD_HASHING
+    tristate "Password hashing utilities"
+    default m
+    help
+      Tristate password hashing helper toggles.
+
+endmenu
+
+menu "Cryptography & Key Management"
 
 config ELF_STUB
     bool "Support ELF executable loader"
@@ -146,18 +285,86 @@ config ELF_STUB
 
 endmenu
 
-menu "Networking support"
+menu "Debugging, Profiling & Logging Tools"
 
-config NET_STUB
-    bool "Stub networking stack"
+config ENABLE_DEBUG
+    bool "Enable debug symbols"
     default n
     help
-      Placeholder entry to reproduce the networking menu from the Linux
-      setup UI.
+      Appends -g to the compiler flags for easier debugging.
+
+config DEBUG_LOG_ROOTFS
+    bool "Verbose rootfs logging"
+    default n
+    help
+      Increase verbosity of rootfs logging; placeholder for menu completeness.
+
+config DEBUG_KERNEL_PANIC_TOOLS
+    bool "Kernel panic simulation tools"
+    default n
+    help
+      Provide mock kernel panic simulation toggles for debugging drills.
+
+config DEBUG_PERF_ANALYSIS
+    tristate "Perf event analysis"
+    default m
+    help
+      Module-ready perf-style event analysis helpers.
+
+config DEBUG_TRACING_SUBSYSTEM
+    tristate "System tracing subsystem"
+    default m
+    help
+      Tracing placeholder matching the prompt's profiling tools.
 
 endmenu
 
-menu "Device Drivers"
+menu "Virtualization & Containers"
+
+config VIRT_STUB
+    bool "Stub virtualization support"
+    default n
+    help
+      Placeholder entry to mirror the virtualization menu seen in the Linux
+      kernel setup interface.
+
+config VIRT_CONTAINER_HELPERS
+    tristate "Container helper utilities"
+    default n
+    help
+      Stub container support primitives to flesh out the menu.
+
+endmenu
+
+menu "Hardware Utilities & Sensors"
+
+config HW_CPU_SENSORS
+    tristate "CPU sensor drivers"
+    default m
+    help
+      Module-capable CPU sensor driver placeholders.
+
+config HW_FAN_CONTROL
+    tristate "Fan control utilities"
+    default m
+    help
+      Fan control helpers mirroring typical hardware utilities.
+
+config HW_THERMAL_CALIBRATION
+    tristate "Thermal zone calibration tool"
+    default n
+    help
+      Stub thermal calibration option in tristate form.
+
+config HW_BATTERY_DIAGNOSTICS
+    bool "Battery health diagnostics"
+    default n
+    help
+      Battery diagnostics placeholder commonly found in extended menus.
+
+endmenu
+
+menu "Bootloader & Firmware Options"
 
 config ENABLE_SERIAL_DEBUG
     bool "Enable serial debug"
@@ -201,60 +408,30 @@ endmenu
 
 endmenu
 
-menu "File systems"
+menu "Userland Tools & Service Utilities"
 
-config FS_STUB
-    bool "Stub filesystem support"
+config USERLAND_BASE_TOOLS
+    bool "Base userland utilities"
     default y
     help
-      Placeholder entry keeping parity with the Linux menuconfig layout.
+      Keep a minimal userland utility set enabled for demonstrations.
 
-endmenu
-
-menu "Kernel hacking"
-
-config ENABLE_DEBUG
-    bool "Enable debug symbols"
+config USERLAND_SERVICE_WRAPPERS
+    bool "Service manager wrappers"
     default n
     help
-      Appends -g to the compiler flags for easier debugging.
+      Placeholder toggles for init/service helper wrappers.
 
-config DEBUG_LOG_ROOTFS
-    bool "Verbose rootfs logging"
+config USERLAND_LOG_COLLECTOR
+    tristate "Log collection helpers"
     default n
     help
-      Increase verbosity of rootfs logging; placeholder for menu completeness.
+      Module-capable log collection utilities for service debugging.
 
-endmenu
-
-menu "Security options"
-
-config SECURITY_STUB
-    bool "Stub security options"
-    default n
+config USERLAND_RESCUE_SHELL
+    bool "Rescue shell"
+    default y
     help
-      Placeholder entry mirroring the Linux security menu grouping.
-
-endmenu
-
-menu "Cryptographic API"
-
-config CRYPTO_STUB
-    bool "Stub cryptographic support"
-    default n
-    help
-      Placeholder entry reproducing the presence of crypto options in the
-      menu layout.
-
-endmenu
-
-menu "Virtualization"
-
-config VIRT_STUB
-    bool "Stub virtualization support"
-    default n
-    help
-      Placeholder entry to mirror the virtualization menu seen in the Linux
-      kernel setup interface.
+      Minimal rescue shell entry to mirror menuconfig userland sections.
 
 endmenu
