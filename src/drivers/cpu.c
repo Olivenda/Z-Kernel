@@ -1,6 +1,8 @@
 #include <stddef.h>
 #include <stdint.h>
-#include <string.h>
+
+#include "memory.h"
+#include "string.h"
 
 #include "console.h"
 #include "cpu.h"
