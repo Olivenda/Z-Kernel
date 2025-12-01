@@ -1,86 +1,88 @@
-# Top-level Kconfig for Z-Kernel styled after the classic Linux menuconfig layout
-
 mainmenu "Linux Kernel Configuration"
 
-menu "General system configuration"
+menu "General System Configuration"
 
 config LOCALVERSION
-    string "Local version - append to kernel release"
+    string "Local version suffix"
     default ""
     help
-      Optional local suffix shown after the kernel release string.
+      Optional local suffix appended to the kernel release string.
 
 config DEFAULT_HOSTNAME
     string "Default hostname"
     default "zkernel"
     help
-      Hostname used by the kernel if no other hostname is provided.
+      Hostname used if none is supplied by userland.
 
 config USE_GRUB
-    bool "Build bootable ISO (GRUB-mkrescue)"
+    bool "Build bootable GRUB-mkrescue ISO"
     default y
     help
-      When enabled, the build produces a GRUB-mkrescue ISO image.
+      When enabled, a GRUB-mkrescue ISO image is generated.
 
 config ENABLE_BIN
-    bool "Emit raw kernel binary"
+    bool "Generate raw kernel binary"
     default y
     help
-      Build a flat binary alongside the ELF image (useful for experimentation).
+      Produce a flat binary alongside the ELF kernel.
 
 config GENERATE_MAP
     bool "Generate linker map file"
     default y
     help
-      Ask the linker to emit a map file for inspecting symbol placement.
+      Emit a linker map for symbol inspection.
 
 config BOOT_BANNER
     bool "Print boot banner"
     default y
     help
-      Show a short boot banner before other log messages.
+      Show a boot banner before other log messages.
 
 config LOG_ROOTFS
-    bool "Log rootfs contents"
+    bool "Log root filesystem contents"
     default y
     help
-      Initialize the bundled rootfs and print its entries at boot.
+      Initialize the bundled rootfs and print its entries.
 
 config CUSTOM_CFLAGS
     string "Additional compiler flags"
     default ""
     help
-      Extra compiler flags appended to the base kernel CFLAGS.
+      Extra flags appended to the default kernel CFLAGS.
 
 config OPT_LEVEL
     string "Optimization level"
     default "O2"
     help
-      Controls the compiler optimization level flag passed to GCC.
+      GCC optimization level (e.g. O0, O1, O2, O3).
 
 endmenu
 
+
+menu "Module & Block Layer Options"
+
 config MODULES
-    bool "Enable loadable module support"
+    bool "Loadable module support (stub)"
     default n
     help
-      Placeholder toggle mirroring the Linux menu entry. Modules are not
-      currently implemented in this kernel.
+      Stub option matching classic menuconfig layout.
 
 config BLOCK
-    bool "Enable the block layer"
+    bool "Block layer (stub)"
     default y
     help
-      Placeholder toggle for block device support, matching the menuconfig
-      layout shown in classic Linux screenshots.
+      Placeholder representing block device support.
 
-menu "CPU & Architecture options"
+endmenu
+
+
+menu "CPU & Architecture Options"
 
 config HELLO
-    bool "Enable Hello World output"
+    bool "Enable Hello World message"
     default y
     help
-      Print a small hello message from the kernel entry point.
+      Print a hello message from the kernel entry point.
 
 choice
     prompt "Hello language"
@@ -90,348 +92,272 @@ config LANG_EN
     bool "English"
 
 config LANG_DE
-    bool "Deutsch"
+    bool "German"
 
 endchoice
 
 config ENABLE_PAGING
-    bool "Enable Paging"
+    bool "Enable paging"
     default n
     help
-      Enable paging support (placeholder toggle for future MMU work).
+      Placeholder for future paging/MMU features.
 
 endmenu
 
-menu "Memory and RAM options"
+
+menu "Memory & RAM Options"
 
 config LOG_MEMORY_MAP
     bool "Log usable memory map"
     default y
     help
-      Walk the Stivale2 memory map and log usable ranges at boot.
+      Log Stivale2 memory ranges detected at boot.
 
 config HEAP_DEMO
-    bool "Allocate heap demo page"
+    bool "Allocate demo heap page"
     default y
     help
-      Allocate and report a demo heap page from the bump allocator.
+      Allocate and report a demo page from the bump allocator.
 
 config MEM_TEST_PATTERN
     bool "Emit memory test pattern"
     default n
     help
-      Placeholder toggle to simulate memory diagnostics typically available
-      in menuconfig-driven kernels.
+      Placeholder for simple memory diagnostic patterns.
 
 endmenu
+
 
 menu "Power Management & ACPI"
 
 config PM_STUB
-    bool "Stub power management toggle"
+    bool "Power management stub"
     default n
     help
-      Placeholder entry to mirror the ACPI menu presence in Linux
-      menuconfig screenshots.
+      Placeholder for ACPI/PM menu.
 
 endmenu
 
-menu "Bus options (PCI etc.)"
+
+menu "Bus Options (PCI etc.)"
 
 config PCI_STUB
-    bool "Stub PCI support"
+    bool "PCI support (stub)"
     default n
     help
-      Placeholder entry to mirror bus-related options in the menu layout.
+      Placeholder for PCI menu layout.
 
 endmenu
+
 
 menu "Filesystem Support"
 
 config FS_STUB
-    bool "Stub filesystem support"
+    bool "Generic filesystem support (stub)"
     default y
-    help
-      Placeholder entry keeping parity with the Linux menuconfig layout.
 
 config RAMFS_SUPPORT
-    bool "Built-in ramfs-style root"
+    bool "Built-in RAMFS-style root"
     default y
-    help
-      Retain the bundled in-memory rootfs as a simple ramfs-like store.
 
 config EXT_STUB
-    bool "EXT-style filesystem helpers"
+    bool "EXT-style filesystem (stub)"
     default n
-    help
-      Simulated EXT support toggle mirroring traditional filesystem menus.
 
 endmenu
+
 
 menu "Networking Support"
 
 config NET_STUB
-    bool "Stub networking stack"
+    bool "Networking stack (stub)"
     default n
-    help
-      Placeholder entry to reproduce the networking menu from the Linux
-      setup UI.
 
 config NET_LOOPBACK
     bool "Loopback device"
     default y
-    help
-      Keep a loopback-style placeholder to mirror the kernel's networking
-      defaults.
 
 config NET_IPV4_PLACEHOLDER
-    bool "IPv4 core options"
+    bool "IPv4 core options (stub)"
     default n
-    help
-      Stub IPv4 selector to flesh out the networking submenu.
 
 endmenu
+
 
 menu "Network Tools & Diagnostics"
 
 config NET_PING_TRACE
-    tristate "Ping/Traceroute stack"
+    tristate "Ping/Traceroute utilities"
     default y
-    help
-      Include a simulated ping/traceroute helper stack to mirror common
-      diagnostic tools.
 
 config NET_PACKET_ANALYZER
-    tristate "Network packet analyzer"
+    tristate "Packet analyzer tool"
     default m
-    help
-      Tristate placeholder for a tcpdump-style packet analyzer.
 
 config NET_CONGESTION_SUITE
     tristate "TCP congestion test suite"
     default n
-    help
-      Stub congestion control test helpers, displayed as a tristate option.
 
 config NET_WOL_UTILS
     bool "Wake-on-LAN utilities"
     default n
-    help
-      Optional Wake-on-LAN helper toggles.
 
 config NET_ROUTING_HELPERS
-    bool "Routing helper tools"
+    bool "Routing helper utilities"
     default n
-    help
-      Placeholder routing utilities commonly exposed in extended menuconfig
-      frontends.
 
 config NET_SPEEDTEST_CLI
     tristate "Speedtest CLI module"
     default m
-    help
-      Simulated speed test client entry shown as a module-capable tristate.
 
 endmenu
+
 
 menu "Security & Hardening Tools"
 
 config SECURITY_STUB
-    bool "Stub security options"
+    bool "Generic security options (stub)"
     default n
-    help
-      Placeholder entry mirroring the Linux security menu grouping.
 
 config SECURITY_FIREWALL_HELPERS
-    bool "Firewall helpers"
+    bool "Firewall helper routines"
     default n
-    help
-      Toggle placeholder firewall helper routines.
 
 config SECURITY_IDS_COMPONENTS
     bool "Intrusion detection components"
     default n
-    help
-      Stub intrusion-detection building blocks mirrored from the prompt.
 
 config SECURITY_SANDBOX_HELPERS
     tristate "Sandboxing helpers"
     default m
-    help
-      Module-capable sandbox helper routines for isolation experiments.
 
 config SECURITY_SECURE_RANDOM
     bool "Secure random generator tunables"
     default n
-    help
-      Placeholder secure random generator tuning options.
 
 config SECURITY_PASSWORD_HASHING
     tristate "Password hashing utilities"
     default m
-    help
-      Tristate password hashing helper toggles.
 
 endmenu
+
 
 menu "Cryptography & Key Management"
 
 config ELF_STUB
-    bool "Support ELF executable loader"
+    bool "ELF loader support (stub)"
     default y
-    help
-      Placeholder indicating the kernel boots ELF binaries; matches the
-      menuconfig layout without altering build behavior.
 
 endmenu
 
-menu "Debugging, Profiling & Logging Tools"
+
+menu "Debugging, Profiling & Logging"
 
 config ENABLE_DEBUG
-    bool "Enable debug symbols"
+    bool "Enable debug symbols (-g)"
     default n
-    help
-      Appends -g to the compiler flags for easier debugging.
 
 config DEBUG_LOG_ROOTFS
     bool "Verbose rootfs logging"
     default n
-    help
-      Increase verbosity of rootfs logging; placeholder for menu completeness.
 
 config DEBUG_KERNEL_PANIC_TOOLS
     bool "Kernel panic simulation tools"
     default n
-    help
-      Provide mock kernel panic simulation toggles for debugging drills.
 
 config DEBUG_PERF_ANALYSIS
     tristate "Perf event analysis"
     default m
-    help
-      Module-ready perf-style event analysis helpers.
 
 config DEBUG_TRACING_SUBSYSTEM
     tristate "System tracing subsystem"
     default m
-    help
-      Tracing placeholder matching the prompt's profiling tools.
 
 endmenu
+
 
 menu "Virtualization & Containers"
 
 config VIRT_STUB
-    bool "Stub virtualization support"
+    bool "Virtualization support (stub)"
     default n
-    help
-      Placeholder entry to mirror the virtualization menu seen in the Linux
-      kernel setup interface.
 
 config VIRT_CONTAINER_HELPERS
     tristate "Container helper utilities"
     default n
-    help
-      Stub container support primitives to flesh out the menu.
 
 endmenu
+
 
 menu "Hardware Utilities & Sensors"
 
 config HW_CPU_SENSORS
-    tristate "CPU sensor drivers"
+    tristate "CPU sensors"
     default m
-    help
-      Module-capable CPU sensor driver placeholders.
 
 config HW_FAN_CONTROL
-    tristate "Fan control utilities"
+    tristate "Fan control"
     default m
-    help
-      Fan control helpers mirroring typical hardware utilities.
 
 config HW_THERMAL_CALIBRATION
-    tristate "Thermal zone calibration tool"
+    tristate "Thermal calibration tool"
     default n
-    help
-      Stub thermal calibration option in tristate form.
 
 config HW_BATTERY_DIAGNOSTICS
-    bool "Battery health diagnostics"
+    bool "Battery diagnostics"
     default n
-    help
-      Battery diagnostics placeholder commonly found in extended menus.
 
 endmenu
+
 
 menu "Bootloader & Firmware Options"
 
 config ENABLE_SERIAL_DEBUG
-    bool "Enable serial debug"
+    bool "Enable serial debug output"
     default n
-    help
-      Initialize COM1 for debug logging alongside the VGA console.
 
 config ENABLE_KEYBOARD_ECHO
-    bool "Enable keyboard echo loop"
+    bool "Enable keyboard echo"
     default y
-    help
-      Initialize the keyboard driver and echo key presses to the console.
 
-menu "Graphics support"
+menu "Graphics Support"
 
 config FRAMEBUFFER_ENABLE
-    bool "Enable framebuffer console"
+    bool "Framebuffer console"
     default y
-    help
-      Clear the bootloader-provided framebuffer and prepare it for drawing.
 
 config FRAMEBUFFER_BG_COLOR
     string "Framebuffer background color (0xRRGGBB)"
     default "0x000000"
-    help
-      RGB color used to clear the framebuffer when enabled.
 
 config FRAMEBUFFER_TEST_PATTERN
-    bool "Draw framebuffer test pattern"
+    bool "Framebuffer test pattern"
     default n
-    help
-      Render a simple diagnostic pattern into the framebuffer at boot.
 
 config VGA_COLOR
-    string "Default VGA text attribute (0xF0B0)"
+    string "VGA text attribute (0xF0B0)"
     default "0x0700"
-    help
-      VGA text attribute word controlling foreground/background colors.
 
 endmenu
-
 endmenu
+
 
 menu "Userland Tools & Service Utilities"
 
 config USERLAND_BASE_TOOLS
-    bool "Base userland utilities"
+    bool "Base userland tools"
     default y
-    help
-      Keep a minimal userland utility set enabled for demonstrations.
 
 config USERLAND_SERVICE_WRAPPERS
     bool "Service manager wrappers"
     default n
-    help
-      Placeholder toggles for init/service helper wrappers.
 
 config USERLAND_LOG_COLLECTOR
-    tristate "Log collection helpers"
+    tristate "Log collection utilities"
     default n
-    help
-      Module-capable log collection utilities for service debugging.
 
 config USERLAND_RESCUE_SHELL
     bool "Rescue shell"
     default y
-    help
-      Minimal rescue shell entry to mirror menuconfig userland sections.
 
 endmenu
