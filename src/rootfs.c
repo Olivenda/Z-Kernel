@@ -1,7 +1,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <string.h>
+#include "string.h"
 
 #include "console.h"
 #include "rootfs.h"

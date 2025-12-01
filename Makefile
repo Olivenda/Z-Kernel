@@ -24,7 +24,7 @@ KERNEL_ELF := $(BUILD_DIR)/kernel.elf
 KERNEL_BIN := $(BUILD_DIR)/kernel.bin
 
 SRC := $(SRC_DIR)/kernel.c $(SRC_DIR)/boot.S \
-       $(SRC_DIR)/console.c $(SRC_DIR)/memory.c $(SRC_DIR)/rootfs.c \
+       $(SRC_DIR)/console.c $(SRC_DIR)/memory.c $(SRC_DIR)/string.c $(SRC_DIR)/rootfs.c \
        $(SRC_DIR)/drivers/serial.c $(SRC_DIR)/drivers/keyboard.c $(SRC_DIR)/drivers/cpu.c
 OBJ := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter %.c,$(SRC)))        $(patsubst $(SRC_DIR)/%.S,$(BUILD_DIR)/%.o,$(filter %.S,$(SRC)))
 
