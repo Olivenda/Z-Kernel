@@ -3,8 +3,10 @@
 #include <stdint.h>
 #include <generated/autoconf.h>
 #include "console.h"
-#include "memory.h"
+#include "cpu.h"
 #include "keyboard.h"
+#include "memory.h"
+#include "rootfs.h"
 #include "stivale2.h"
 
 static void scan_memory(void) {
@@ -49,8 +51,13 @@ void kernel_main(struct stivale2_struct *boot_info) {
 #endif
 
     kprint("Z-Kernel ready.\n");
+    struct cpu_info cpu = {0};
+    cpu_detect(&cpu);
+    cpu_log(&cpu);
     scan_memory();
     heap_demo();
+    rootfs_init();
+    rootfs_log();
 
     keyboard_init();
     kprint("Keyboard polling active. Type to echo...\n");
