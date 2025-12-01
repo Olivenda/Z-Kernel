@@ -1,8 +1,8 @@
 # Top-level Kconfig for Z-Kernel
 
-mainmenu "Z-Kernel Configuration"
+mainmenu "Linux Kernel Configuration"
 
-menu "Build options"
+menu "General setup"
 
 config USE_GRUB
     bool "Create GRUB bootable ISO"
@@ -40,28 +40,6 @@ config CUSTOM_CFLAGS
     help
       Additional compiler flags appended to the base kernel CFLAGS.
 
-endmenu
-
-menu "Kernel features"
-
-config HELLO
-    bool "Enable Hello World output"
-    default y
-    help
-      Print a small hello message from the kernel entry point.
-
-choice
-    prompt "Hello language"
-    default LANG_EN
-
-config LANG_EN
-    bool "English"
-
-config LANG_DE
-    bool "Deutsch"
-
-endchoice
-
 config BOOT_BANNER
     bool "Print boot banner"
     default y
@@ -86,6 +64,28 @@ config LOG_ROOTFS
     help
       Initialize the bundled rootfs and print its entries at boot.
 
+endmenu
+
+menu "Kernel features"
+
+config HELLO
+    bool "Enable Hello World output"
+    default y
+    help
+      Print a small hello message from the kernel entry point.
+
+choice
+    prompt "Hello language"
+    default LANG_EN
+
+config LANG_EN
+    bool "English"
+
+config LANG_DE
+    bool "Deutsch"
+
+endchoice
+
 config ENABLE_PAGING
     bool "Enable Paging"
     default n
@@ -94,7 +94,7 @@ config ENABLE_PAGING
 
 endmenu
 
-menu "Driver options"
+menu "Device Drivers"
 
 config ENABLE_SERIAL_DEBUG
     bool "Enable serial debug"
@@ -108,7 +108,7 @@ config ENABLE_KEYBOARD_ECHO
     help
       Initialize the keyboard driver and echo key presses to the console.
 
-menu "Graphics options"
+menu "Graphics support"
 
 config FRAMEBUFFER_ENABLE
     bool "Enable framebuffer console"
