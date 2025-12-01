@@ -1,29 +1,53 @@
 Z-Kernel: Minimal 64-bit kernel
+================================
 
-This project demonstrates a minimal 64-bit kernel (not Linux) that prints a "Hello World" style
-message to VGA text memory and provides a Makefile with a menuconfig-like interface.
+Z-Kernel is a tiny 64-bit hobby kernel (not Linux) that drops into long mode, writes a
+"Hello World"-style message directly to VGA text memory, and boots via Multiboot 2.
+It is intentionally small to keep the focus on the toolchain and boot flow rather than
+kernel features.
 
-Quick start (prerequisites):
-- A cross-compiler toolchain (recommended): x86_64-elf-gcc, x86_64-elf-ld, objcopy
-  On Debian/Ubuntu: apt install gcc-multilib nasm grub-pc-bin grub-common xorriso qemu-system-x86
-  Alternatively build/install a cross-compiler (recommended for real kernel dev).
-- grub-mkrescue to create the ISO
-- qemu-system-x86_64 to run
+Prerequisites
+-------------
+You need the usual bare-metal toolchain components:
 
-Build and run:
-1) Optional: Configure with make menuconfig
-   $ make menuconfig
-   This creates config.mk; options: ENABLE_HELLO, LANGUAGE (en/de), USE_GRUB
+- **Cross-compiler**: `x86_64-elf-gcc`, `x86_64-elf-ld`, `objcopy`
+  - Debian/Ubuntu example: `apt install gcc-multilib nasm grub-pc-bin grub-common xorriso qemu-system-x86`
+  - For serious kernel work, building a dedicated cross-compiler is recommended.
+- **ISO builder**: `grub-mkrescue`
+- **Emulator**: `qemu-system-x86_64`
 
-2) Build and create ISO:
-   $ make
+Configuring
+-----------
+Run `make menuconfig` (optional) to generate `config.mk`. Available toggles:
 
-3) Run in QEMU:
-   $ make run
+- `ENABLE_HELLO`: display the hello message when the kernel starts.
+- `LANGUAGE`: choose `en` or `de` for the greeting.
+- `USE_GRUB`: enable GRUB-specific boot flow.
 
-Files of interest:
-- src/boot.S   : multiboot2 header + minimal long-mode switch (assembly)
-- src/kernel.c : minimal C kernel that writes to VGA memory
-- link.ld      : linker script
-- Makefile     : build system and ISO creation
-- scripts/menuconfig : small shell prompt to write config.mk
+Building
+--------
+
+```sh
+# Create or update config.mk (optional)
+make menuconfig
+
+# Build the kernel and generate an ISO at iso/z-kernel.iso
+make
+```
+
+Running
+-------
+
+```sh
+# Launch the ISO in QEMU
+make run
+```
+
+Key files
+---------
+
+- `src/boot.S`: Multiboot 2 header and minimal long-mode switch (assembly).
+- `src/kernel.c`: Minimal C kernel that writes to VGA memory.
+- `link.ld`: Linker script controlling kernel layout.
+- `Makefile`: Build system, ISO creation, and `menuconfig` wiring.
+- `scripts/menuconfig`: Small shell prompt that writes `config.mk`.
