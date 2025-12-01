@@ -1,11 +1,23 @@
-# Top-level Kconfig for Z-Kernel
+# Top-level Kconfig for Z-Kernel styled after the classic Linux menuconfig layout
 
 mainmenu "Linux Kernel Configuration"
 
 menu "General setup"
 
+config LOCALVERSION
+    string "Local version - append to kernel release"
+    default ""
+    help
+      Optional local suffix shown after the kernel release string.
+
+config DEFAULT_HOSTNAME
+    string "Default hostname"
+    default "zkernel"
+    help
+      Hostname used by the kernel if no other hostname is provided.
+
 config USE_GRUB
-    bool "Create GRUB bootable ISO"
+    bool "Build bootable ISO (GRUB-mkrescue)"
     default y
     help
       When enabled, the build produces a GRUB-mkrescue ISO image.
@@ -21,24 +33,6 @@ config GENERATE_MAP
     default y
     help
       Ask the linker to emit a map file for inspecting symbol placement.
-
-config ENABLE_DEBUG
-    bool "Enable debug symbols"
-    default n
-    help
-      Appends -g to the compiler flags for easier debugging.
-
-config OPT_LEVEL
-    string "Optimization level"
-    default "O2"
-    help
-      Controls the compiler optimization level flag passed to GCC.
-
-config CUSTOM_CFLAGS
-    string "Custom CFLAGS"
-    default ""
-    help
-      Additional compiler flags appended to the base kernel CFLAGS.
 
 config BOOT_BANNER
     bool "Print boot banner"
@@ -64,9 +58,35 @@ config LOG_ROOTFS
     help
       Initialize the bundled rootfs and print its entries at boot.
 
+config CUSTOM_CFLAGS
+    string "Additional compiler flags"
+    default ""
+    help
+      Extra compiler flags appended to the base kernel CFLAGS.
+
+config OPT_LEVEL
+    string "Optimization level"
+    default "O2"
+    help
+      Controls the compiler optimization level flag passed to GCC.
+
 endmenu
 
-menu "Kernel features"
+config MODULES
+    bool "Enable loadable module support"
+    default n
+    help
+      Placeholder toggle mirroring the Linux menu entry. Modules are not
+      currently implemented in this kernel.
+
+config BLOCK
+    bool "Enable the block layer"
+    default y
+    help
+      Placeholder toggle for block device support, matching the menuconfig
+      layout shown in classic Linux screenshots.
+
+menu "Processor type and features"
 
 config HELLO
     bool "Enable Hello World output"
@@ -91,6 +111,49 @@ config ENABLE_PAGING
     default n
     help
       Enable paging support (placeholder toggle for future MMU work).
+
+endmenu
+
+menu "Power management and ACPI options"
+
+config PM_STUB
+    bool "Stub power management toggle"
+    default n
+    help
+      Placeholder entry to mirror the ACPI menu presence in Linux
+      menuconfig screenshots.
+
+endmenu
+
+menu "Bus options (PCI etc.)"
+
+config PCI_STUB
+    bool "Stub PCI support"
+    default n
+    help
+      Placeholder entry to mirror bus-related options in the menu layout.
+
+endmenu
+
+menu "Executable file formats / Emulations"
+
+config ELF_STUB
+    bool "Support ELF executable loader"
+    default y
+    help
+      Placeholder indicating the kernel boots ELF binaries; matches the
+      menuconfig layout without altering build behavior.
+
+endmenu
+
+menu "Networking support"
+
+config NET_STUB
+    bool "Stub networking stack"
+    default n
+    help
+      Placeholder entry to reproduce the networking menu from the Linux
+      setup UI.
 
 endmenu
 
@@ -135,5 +198,63 @@ config VGA_COLOR
       VGA text attribute word controlling foreground/background colors.
 
 endmenu
+
+endmenu
+
+menu "File systems"
+
+config FS_STUB
+    bool "Stub filesystem support"
+    default y
+    help
+      Placeholder entry keeping parity with the Linux menuconfig layout.
+
+endmenu
+
+menu "Kernel hacking"
+
+config ENABLE_DEBUG
+    bool "Enable debug symbols"
+    default n
+    help
+      Appends -g to the compiler flags for easier debugging.
+
+config DEBUG_LOG_ROOTFS
+    bool "Verbose rootfs logging"
+    default n
+    help
+      Increase verbosity of rootfs logging; placeholder for menu completeness.
+
+endmenu
+
+menu "Security options"
+
+config SECURITY_STUB
+    bool "Stub security options"
+    default n
+    help
+      Placeholder entry mirroring the Linux security menu grouping.
+
+endmenu
+
+menu "Cryptographic API"
+
+config CRYPTO_STUB
+    bool "Stub cryptographic support"
+    default n
+    help
+      Placeholder entry reproducing the presence of crypto options in the
+      menu layout.
+
+endmenu
+
+menu "Virtualization"
+
+config VIRT_STUB
+    bool "Stub virtualization support"
+    default n
+    help
+      Placeholder entry to mirror the virtualization menu seen in the Linux
+      kernel setup interface.
 
 endmenu
