@@ -36,9 +36,30 @@ static void heap_demo(void) {
     kprint("Allocated 4KiB at %x\n", (uint64_t)(uintptr_t)block);
 }
 
+static void print_boot_banner(void) {
+    console_write("\n==============================\n");
+    console_write("      Welcome to Z-Kernel\n");
+    console_write("==============================\n");
+    console_write("Booting with:");
+#ifdef CONFIG_ENABLE_SERIAL_DEBUG
+    console_write(" serial-debug");
+#endif
+#ifdef CONFIG_FRAMEBUFFER_ENABLE
+    console_write(" framebuffer");
+#endif
+#ifdef CONFIG_ENABLE_KEYBOARD_ECHO
+    console_write(" keyboard-echo");
+#endif
+    console_write("\n\n");
+}
+
 void kernel_main(struct stivale2_struct *boot_info) {
     console_init(boot_info);
     memory_init(boot_info);
+
+#ifdef CONFIG_BOOT_BANNER
+    print_boot_banner();
+#endif
 
 #ifdef CONFIG_HELLO
 #ifdef CONFIG_LANG_DE
@@ -54,19 +75,29 @@ void kernel_main(struct stivale2_struct *boot_info) {
     struct cpu_info cpu = {0};
     cpu_detect(&cpu);
     cpu_log(&cpu);
+#ifdef CONFIG_LOG_MEMORY_MAP
     scan_memory();
+#endif
+#ifdef CONFIG_HEAP_DEMO
     heap_demo();
+#endif
+#ifdef CONFIG_LOG_ROOTFS
     rootfs_init();
     rootfs_log();
+#endif
 
+#ifdef CONFIG_ENABLE_KEYBOARD_ECHO
     keyboard_init();
     kprint("Keyboard polling active. Type to echo...\n");
+#endif
 
     for (;;) {
+#ifdef CONFIG_ENABLE_KEYBOARD_ECHO
         char c;
         if (keyboard_poll(&c)) {
             console_putc(c);
         }
+#endif
         __asm__ volatile ("hlt");
     }
 }
