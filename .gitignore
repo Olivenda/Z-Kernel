@@ -2,3 +2,4 @@ build/
 iso/
 zkernel.iso
 config.mk
+.config
