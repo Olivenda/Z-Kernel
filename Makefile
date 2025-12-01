@@ -39,10 +39,12 @@ $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
+	@mkdir -p $(dir $@)
 	@echo CC $@
 	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.S | $(BUILD_DIR)
+	@mkdir -p $(dir $@)
 	@echo AS $@
 	$(AS) $(CFLAGS) -c $< -o $@
 
