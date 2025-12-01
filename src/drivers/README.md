@@ -1,3 +1,8 @@
 # Drivers
 
-This directory is reserved for future kernel drivers such as device controllers, filesystems, or platform-specific hardware abstractions. Add each driver as its own source file or subdirectory to keep the kernel core organized.
+This directory houses basic device helpers:
+
+- `serial.c`: initializes COM1 for optional debug output.
+- `keyboard.c`: polls the PS/2 controller for raw scancodes and echoes printable keys.
+
+Add each driver as its own source file or subdirectory to keep the kernel core organized.

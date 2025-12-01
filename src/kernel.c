@@ -1,37 +1,65 @@
-/* Minimal 64-bit kernel in C.
-   Provides kernel_main which writes "Hello World" (or "Hallo Welt") to VGA text buffer.
-*/
+/* Minimal 64-bit kernel using Stivale2. */
 
 #include <stdint.h>
 #include <generated/autoconf.h>
+#include "console.h"
+#include "memory.h"
+#include "keyboard.h"
+#include "stivale2.h"
 
-void kernel_main(void);
+static void scan_memory(void) {
+    const struct stivale2_mmap_tag *tag = memory_get_mmap();
+    if (!tag) {
+        kprint("No memory map found.\n");
+        return;
+    }
 
-static inline void outb(uint16_t port, uint8_t val) {
-    __asm__ volatile ("outb %0, %1" : : "a"(val), "Nd"(port));
-}
-
-void write_string(const char *s) {
-    volatile uint16_t *video = (volatile uint16_t*)0xB8000;
-    const char *p = s;
-    int i = 0;
-    while (*p) {
-        uint8_t ch = (uint8_t)*p++;
-        video[i++] = (uint16_t)ch | (uint16_t)0x0700; /* white on black */
+    kprint("Memory map entries: %x\n", (uint64_t)tag->entries);
+    for (uint64_t i = 0; i < tag->entries; i++) {
+        const struct stivale2_mmap_entry *entry = &tag->memmap[i];
+        if (entry->type != STIVALE2_MMAP_USABLE) {
+            continue;
+        }
+        kprint(" - base %x length %x\n", entry->base, entry->length);
     }
 }
 
-void kernel_main(void) {
+static void heap_demo(void) {
+    void *block = bump_alloc(4096, 16);
+    if (!block) {
+        kprint("Bump allocator out of memory\n");
+        return;
+    }
+    memset(block, 0xAA, 4096);
+    kprint("Allocated 4KiB at %x\n", (uint64_t)(uintptr_t)block);
+}
+
+void kernel_main(struct stivale2_struct *boot_info) {
+    console_init(boot_info);
+    memory_init(boot_info);
+
+#ifdef CONFIG_HELLO
 #ifdef CONFIG_LANG_DE
     const char *msg = "Hallo Welt";
 #else
     const char *msg = "Hello World";
 #endif
-
-#ifdef CONFIG_HELLO
-    write_string(msg);
+    console_write(msg);
+    console_write("\n");
 #endif
+
+    kprint("Z-Kernel ready.\n");
+    scan_memory();
+    heap_demo();
+
+    keyboard_init();
+    kprint("Keyboard polling active. Type to echo...\n");
+
     for (;;) {
+        char c;
+        if (keyboard_poll(&c)) {
+            console_putc(c);
+        }
         __asm__ volatile ("hlt");
     }
 }

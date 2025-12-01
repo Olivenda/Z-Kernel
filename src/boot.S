@@ -1,92 +1,41 @@
-/* Minimal multiboot2 header + long mode switch
-   This file contains a small multiboot2 header so GRUB recognizes the kernel as multiboot2.
-   After GRUB loads us, we run small code to enable long mode (paging + PAE + LME) and
-   jump to the C kernel_main entry point.
-
-   This is written in GAS (AT&T) syntax.
+/* Stivale2 entry point for Z-Kernel.
+   The bootloader hands us a pointer to struct stivale2_struct in RDI.
 */
 
-    .section .multiboot2_header
+    .section .stivale2hdr,"a"
     .align 8
-    /* multiboot2 header: magic, architecture, header_length, checksum */
-    .long 0xE85250D6
-    .long 0x00000000
-    .long header_end - .
-    .long -(0xE85250D6 + 0 + (header_end - .))
+    .global stivale2_header
 
-    /* end tag */
-    .long 0
-    .long 0
+/* Request a simple framebuffer; fall back gracefully to VGA text if unavailable. */
+#define STIVALE2_HEADER_TAG_FRAMEBUFFER 0x3ecc1bc43d0f7971
 
-header_end:
+stivale2_header:
+    .quad 0                  /* entry point: use ELF entry (_start) */
+    .quad stack_top          /* stack */
+    .quad 0                  /* flags */
+    .quad stivale2_fb_tag    /* first header tag */
+
+stivale2_fb_tag:
+    .quad STIVALE2_HEADER_TAG_FRAMEBUFFER
+    .quad 0                  /* no further tags */
+    .quad 1024               /* preferred width */
+    .quad 768                /* preferred height */
+    .quad 32                 /* preferred bpp */
 
     .section .text
-    .global start
+    .global _start
     .extern kernel_main
 
-start:
-    /* We assume GRUB loads us in 32-bit protected mode with a flat identity mapping. */
-    /* Build minimal identity mapped page tables for long mode. */
-
-    /* Zero registers */
-    xor %rax, %rax
-
-    /* Setup page tables in a small static area just below 1MB to be safe */
-    lea 1f(%rip), %rbx    /* RBX -> page tables area */
-
-    /* PML4 (1 entry) */
-    movq %rbx, (%rbx)         /* PML4[0] -> address of PDPT (rbx) + 0x100 */
-    addq $0x100, %rbx
-
-    /* PDPT (1 entry) */
-    movq %rbx, (%rbx)         /* PDPT[0] -> address of PD (rbx) + 0x100 */
-    addq $0x100, %rbx
-
-    /* PD (1 entry) map 1GB using 2MB pages would be simpler but we'll map using 2MB pages if supported. */
-    /* Create a single 2MB page mapping for the first 2MB (that's enough for our kernel). */
-    movq $0x0000000000000003, (%rbx) /* present + writable - will patch with address below */
-
-    /* Patch PD entry with physical addr 0x0 (identity) | flags */
-    movq $0, %rax
-    movq %rax, 8(%rbx) /* ensure clearing next entries */
-
-    /* Now enable PAE and Long Mode */
-    /* Enable PAE: set CR4.PAE (bit 5) */
-    mov %cr4, %rax
-    or $0x20, %rax
-    mov %rax, %cr4
-
-    /* Load PML4 physical address into CR3 */
-    lea 1f(%rip), %rax
-    mov %rax, %cr3
-
-    /* Enable syscall/sysret (not needed) */
-
-    /* Enable long mode by setting EFER.LME (MSR 0xC0000080) */
-    mov $0xC0000080, %ecx
-    rdmsr
-    or $0x00000100, %eax
-    wrmsr
-
-    /* Enable paging (set CR0.PG and CR0.PE bits) */
-    mov %cr0, %rax
-    or $0x80000000, %rax
-    mov %rax, %cr0
-
-    /* Far jump to 64-bit label */
-    jmp $0x08, $1f
-
-    .align 4096
-1:
-    /* 64-bit code continues here */
-    /* Call C kernel_main */
-    extern kernel_main
+_start:
+    /* RDI already holds stivale2_struct* per ABI */
     call kernel_main
-    /* Halt if returned */
-1_loop:
-    hlt
-    jmp 1_loop
 
-    .data
-    .balign 4096
-    .space 8192
+.hang:
+    hlt
+    jmp .hang
+
+    .bss
+    .align 16
+stack_bottom:
+    .skip 16384
+stack_top:
