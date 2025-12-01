@@ -107,11 +107,11 @@ stack_top:
     /* Paging structures for the Multiboot path (identity map first 2 MiB). */
     .align 4096
 pml4_table:
-    .quad pdpt_table | 0x3
+    .quad pdpt_table + 0x3
 
     .align 4096
 pdpt_table:
-    .quad pd_table | 0x3
+    .quad pd_table + 0x3
     .space 8 * 511, 0
 
     .align 4096
