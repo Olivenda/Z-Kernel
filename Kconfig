@@ -2,6 +2,48 @@
 
 mainmenu "Z-Kernel Configuration"
 
+menu "Build options"
+
+config USE_GRUB
+    bool "Create GRUB bootable ISO"
+    default y
+    help
+      When enabled, the build produces a GRUB-mkrescue ISO image.
+
+config ENABLE_BIN
+    bool "Emit raw kernel binary"
+    default y
+    help
+      Build a flat binary alongside the ELF image (useful for experimentation).
+
+config GENERATE_MAP
+    bool "Generate linker map file"
+    default y
+    help
+      Ask the linker to emit a map file for inspecting symbol placement.
+
+config ENABLE_DEBUG
+    bool "Enable debug symbols"
+    default n
+    help
+      Appends -g to the compiler flags for easier debugging.
+
+config OPT_LEVEL
+    string "Optimization level"
+    default "O2"
+    help
+      Controls the compiler optimization level flag passed to GCC.
+
+config CUSTOM_CFLAGS
+    string "Custom CFLAGS"
+    default ""
+    help
+      Additional compiler flags appended to the base kernel CFLAGS.
+
+endmenu
+
+menu "Kernel features"
+
 config HELLO
     bool "Enable Hello World output"
     default y
@@ -20,29 +62,29 @@ config LANG_DE
 
 endchoice
 
-config USE_GRUB
-    bool "Create GRUB bootable ISO"
+config BOOT_BANNER
+    bool "Print boot banner"
     default y
     help
-      When enabled, the build produces a GRUB-mkrescue ISO image.
+      Show a short boot banner before other log messages.
 
-config ENABLE_BIN
-    bool "Emit raw kernel binary"
+config LOG_MEMORY_MAP
+    bool "Log usable memory map"
     default y
     help
-      Build a flat binary alongside the ELF image (useful for experimentation).
+      Walk the Stivale2 memory map and log usable ranges at boot.
 
-config ENABLE_DEBUG
-    bool "Enable debug symbols"
-    default n
+config HEAP_DEMO
+    bool "Allocate heap demo page"
+    default y
     help
-      Appends -g to the compiler flags for easier debugging.
+      Allocate and report a demo heap page from the bump allocator.
 
-config ENABLE_SERIAL_DEBUG
-    bool "Enable serial debug"
-    default n
+config LOG_ROOTFS
+    bool "Log rootfs contents"
+    default y
     help
-      Initialize COM1 for debug logging alongside the VGA console.
+      Initialize the bundled rootfs and print its entries at boot.
 
 config ENABLE_PAGING
     bool "Enable Paging"
@@ -50,14 +92,48 @@ config ENABLE_PAGING
     help
       Enable paging support (placeholder toggle for future MMU work).
 
-config OPT_LEVEL
-    string "Optimization level"
-    default "O2"
-    help
-      Controls the compiler optimization level flag passed to GCC.
+endmenu
 
-config CUSTOM_CFLAGS
-    string "Custom CFLAGS"
-    default ""
+menu "Driver options"
+
+config ENABLE_SERIAL_DEBUG
+    bool "Enable serial debug"
+    default n
     help
-      Additional compiler flags appended to the base kernel CFLAGS.
+      Initialize COM1 for debug logging alongside the VGA console.
+
+config ENABLE_KEYBOARD_ECHO
+    bool "Enable keyboard echo loop"
+    default y
+    help
+      Initialize the keyboard driver and echo key presses to the console.
+
+menu "Graphics options"
+
+config FRAMEBUFFER_ENABLE
+    bool "Enable framebuffer console"
+    default y
+    help
+      Clear the bootloader-provided framebuffer and prepare it for drawing.
+
+config FRAMEBUFFER_BG_COLOR
+    string "Framebuffer background color (0xRRGGBB)"
+    default "0x000000"
+    help
+      RGB color used to clear the framebuffer when enabled.
+
+config FRAMEBUFFER_TEST_PATTERN
+    bool "Draw framebuffer test pattern"
+    default n
+    help
+      Render a simple diagnostic pattern into the framebuffer at boot.
+
+config VGA_COLOR
+    string "Default VGA text attribute (0xF0B0)"
+    default "0x0700"
+    help
+      VGA text attribute word controlling foreground/background colors.
+
+endmenu
+
+endmenu
