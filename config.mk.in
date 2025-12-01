@@ -1,0 +1,6 @@
+# Template config.mk written by scripts/menuconfig
+# Do not edit manually; run 'make menuconfig'
+
+ENABLE_HELLO ?= 1
+LANGUAGE ?= en
+USE_GRUB ?= 1
