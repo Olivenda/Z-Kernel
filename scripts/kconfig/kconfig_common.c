@@ -77,6 +77,24 @@ static char *dup_quoted(const char *start) {
     return out;
 }
 
+static void rtrim(char *line) {
+    size_t len = strlen(line);
+    while (len && (line[len-1] == '\n' || line[len-1] == '\r'))
+        line[--len] = '\0';
+}
+
+static char *append_help(char *existing, const char *line) {
+    size_t old_len = existing ? strlen(existing) : 0;
+    size_t add_len = strlen(line);
+    char *buf = realloc(existing, old_len + add_len + 2);
+    if (!buf)
+        return existing;
+    memcpy(buf + old_len, line, add_len);
+    buf[old_len + add_len] = '\n';
+    buf[old_len + add_len + 1] = '\0';
+    return buf;
+}
+
 int parse_kconfig(const char *path, kconfig_t *kc, char *err_buf, size_t err_len) {
     memset(kc, 0, sizeof(*kc));
     FILE *f = fopen(path, "r");
@@ -85,28 +103,40 @@ int parse_kconfig(const char *path, kconfig_t *kc, char *err_buf, size_t err_len
         return -1;
     }
     char line[512];
+    char queued[512];
+    bool has_queued = false;
     option_t *current = NULL;
     option_t *current_choice = NULL;
-    while (fgets(line, sizeof(line), f)) {
-        trim(line);
-        if (!line[0] || starts_with(line, "#"))
+    while (1) {
+        if (has_queued) {
+            strncpy(line, queued, sizeof(line));
+            has_queued = false;
+        } else if (!fgets(line, sizeof(line), f)) {
+            break;
+        }
+        rtrim(line);
+        char trimmed[512];
+        strncpy(trimmed, line, sizeof(trimmed));
+        trimmed[sizeof(trimmed)-1] = '\0';
+        trim(trimmed);
+        if (!trimmed[0] || starts_with(trimmed, "#"))
             continue;
-        if (starts_with(line, "mainmenu") || starts_with(line, "menu"))
+        if (starts_with(trimmed, "mainmenu") || starts_with(trimmed, "menu"))
             continue;
-        if (starts_with(line, "choice")) {
+        if (starts_with(trimmed, "choice")) {
             current_choice = calloc(1, sizeof(option_t));
             current_choice->type = OPT_CHOICE;
             append_option(&kc->options, current_choice);
             current = NULL;
             continue;
         }
-        if (starts_with(line, "endchoice")) {
+        if (starts_with(trimmed, "endchoice")) {
             current_choice = NULL;
             current = NULL;
             continue;
         }
-        if (starts_with(line, "config")) {
-            char *name = dup_token(line + strlen("config"));
+        if (starts_with(trimmed, "config")) {
+            char *name = dup_token(trimmed + strlen("config"));
             option_t *opt = calloc(1, sizeof(option_t));
             opt->name = name;
             opt->type = OPT_BOOL; /* default until specified */
@@ -122,35 +152,59 @@ int parse_kconfig(const char *path, kconfig_t *kc, char *err_buf, size_t err_len
         }
         if (!current && !current_choice)
             continue;
-        if (starts_with(line, "prompt")) {
-            char *p = dup_quoted(line + strlen("prompt"));
+        if (starts_with(trimmed, "prompt")) {
+            char *p = dup_quoted(trimmed + strlen("prompt"));
             if (current_choice)
                 current_choice->prompt = p;
             else if (current)
                 current->prompt = p;
             continue;
         }
-        if (starts_with(line, "bool")) {
+        if (starts_with(trimmed, "bool")) {
             current->type = current->type == OPT_CHOICE_OPT ? OPT_CHOICE_OPT : OPT_BOOL;
             if (!current->prompt)
-                current->prompt = dup_quoted(line + strlen("bool"));
+                current->prompt = dup_quoted(trimmed + strlen("bool"));
             continue;
         }
-        if (starts_with(line, "string")) {
+        if (starts_with(trimmed, "string")) {
             current->type = OPT_STRING;
             if (!current->prompt)
-                current->prompt = dup_quoted(line + strlen("string"));
+                current->prompt = dup_quoted(trimmed + strlen("string"));
             continue;
         }
-        if (starts_with(line, "default")) {
+        if (starts_with(trimmed, "default")) {
             if (current_choice && !current) {
-                kc->default_choice = dup_token(line + strlen("default"));
+                kc->default_choice = dup_token(trimmed + strlen("default"));
             } else if (current) {
                 if (current->type == OPT_STRING)
-                    current->def = dup_quoted(line + strlen("default"));
+                    current->def = dup_quoted(trimmed + strlen("default"));
                 else
-                    current->def = dup_token(line + strlen("default"));
+                    current->def = dup_token(trimmed + strlen("default"));
             }
+            continue;
+        }
+        if (starts_with(trimmed, "help")) {
+            char *dest = NULL;
+            if (current_choice && !current)
+                dest = current_choice->help;
+            else if (current)
+                dest = current->help;
+            while (fgets(line, sizeof(line), f)) {
+                rtrim(line);
+                if (!(line[0] == ' ' || line[0] == '\t')) {
+                    strncpy(queued, line, sizeof(queued));
+                    queued[sizeof(queued)-1] = '\0';
+                    has_queued = true;
+                    break;
+                }
+                char *p = line;
+                while (*p == ' ' || *p == '\t') p++;
+                dest = append_help(dest, p);
+            }
+            if (current_choice && !current)
+                current_choice->help = dest;
+            else if (current)
+                current->help = dest;
             continue;
         }
     }
