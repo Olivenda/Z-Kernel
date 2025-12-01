@@ -1,4 +1,5 @@
 Z-Kernel: Minimal 64-bit kernel
+================================
 
 This project demonstrates a minimal 64-bit kernel (not Linux) that prints a "Hello World" style
 message to VGA text memory. A small Kconfig-inspired frontend (with ncurses `mconf`) powers
