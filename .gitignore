@@ -3,3 +3,5 @@ iso/
 zkernel.iso
 config.mk
 .config
+scripts/kconfig/conf
+scripts/kconfig/mconf
