@@ -2,7 +2,8 @@ Z-Kernel: Minimal 64-bit kernel
 ================================
 
 This project demonstrates a minimal 64-bit kernel (not Linux) that prints a "Hello World" style
-message to VGA text memory. A small Kconfig-inspired frontend (with ncurses `mconf`) powers
+message to VGA text memory, scans physical memory via the Stivale2 memory map, and exposes a
+tiny bump allocator plus debug helpers. A small Kconfig-inspired frontend (with ncurses `mconf`) powers
 `make defconfig` and `make menuconfig` targets so you can tweak the build without touching the
 Makefile manually.
 
@@ -26,9 +27,9 @@ Build and run:
    $ make run
 
 Files of interest:
-- src/boot.S   : multiboot2 header + minimal long-mode switch (assembly)
-- src/kernel.c : minimal C kernel that writes to VGA memory
-- src/drivers/ : placeholder for future drivers to keep hardware logic organized
+- src/boot.S   : Stivale2 header + entry trampoline
+- src/kernel.c : kernel entry that initializes console, memory map, and keyboard echo loop
+- src/drivers/ : serial + keyboard helpers
 - link.ld      : linker script
 - Makefile     : build system and ISO creation
 - scripts/kconfig/* : tiny Kconfig parser + `conf`/`mconf` style helpers

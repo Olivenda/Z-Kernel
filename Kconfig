@@ -38,6 +38,18 @@ config ENABLE_DEBUG
     help
       Appends -g to the compiler flags for easier debugging.
 
+config ENABLE_SERIAL_DEBUG
+    bool "Enable serial debug"
+    default n
+    help
+      Initialize COM1 for debug logging alongside the VGA console.
+
+config ENABLE_PAGING
+    bool "Enable Paging"
+    default n
+    help
+      Enable paging support (placeholder toggle for future MMU work).
+
 config OPT_LEVEL
     string "Optimization level"
     default "O2"

@@ -23,7 +23,9 @@ MCONF ?= scripts/kconfig/mconf
 KERNEL_ELF := $(BUILD_DIR)/kernel.elf
 KERNEL_BIN := $(BUILD_DIR)/kernel.bin
 
-SRC := $(SRC_DIR)/kernel.c $(SRC_DIR)/boot.S
+SRC := $(SRC_DIR)/kernel.c $(SRC_DIR)/boot.S \
+       $(SRC_DIR)/console.c $(SRC_DIR)/memory.c \
+       $(SRC_DIR)/drivers/serial.c $(SRC_DIR)/drivers/keyboard.c
 OBJ := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(filter %.c,$(SRC)))        $(patsubst $(SRC_DIR)/%.S,$(BUILD_DIR)/%.o,$(filter %.S,$(SRC)))
 
 CFLAGS  := -m64 -ffreestanding -nostdlib -fno-stack-protector -Wall -Wextra -Iinclude -include $(KCONFIG_AUTOHEADER)
@@ -133,6 +135,8 @@ config:
 	@echo "CONFIG_LANG_DE=$(CONFIG_LANG_DE)"
 	@echo "CONFIG_USE_GRUB=$(CONFIG_USE_GRUB)"
 	@echo "CONFIG_ENABLE_DEBUG=$(CONFIG_ENABLE_DEBUG)"
+	@echo "CONFIG_ENABLE_SERIAL_DEBUG=$(CONFIG_ENABLE_SERIAL_DEBUG)"
+	@echo "CONFIG_ENABLE_PAGING=$(CONFIG_ENABLE_PAGING)"
 	@echo "CONFIG_OPT_LEVEL=$(CONFIG_OPT_LEVEL)"
 	@echo "CONFIG_ENABLE_BIN=$(CONFIG_ENABLE_BIN)"
 	@echo "CONFIG_CUSTOM_CFLAGS=$(CONFIG_CUSTOM_CFLAGS)"
